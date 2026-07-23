@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# source product photos (converted to public/menu/*.webp — those ARE committed)
+/Images
+# one-off asset scripts / scratch
+convert-images.mjs
+*.tmp.mjs

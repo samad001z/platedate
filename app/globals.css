@@ -1,26 +1,250 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* -------------------------------------------------------------------------
+   Plate Date design tokens — the ONLY file where a hex value may appear.
+   Default Tailwind palettes are wiped below, so untokened utilities like
+   `bg-red-500` or `text-xl` do not exist in this codebase at all.
+   Palette rules (CLAUDE.md §2):
+     1. Gold is a ring, never a fill. Never text on light backgrounds.
+     2. Berry is spent only on money (transactional elements).
+     3. Capacity/status is always worded, never colour-only.
+   ------------------------------------------------------------------------- */
+
+@theme {
+  --color-*: initial;
+  --text-*: initial;
+  --font-sans: initial;
+  --font-serif: initial;
+  --font-mono: initial;
+  --shadow-*: initial;
+  --radius-*: initial;
+
+  /* colour */
+  --color-porcelain: #fffcf9;
+  --color-plum-ink: #26071a;
+  --color-berry: #a00d4c;
+  --color-berry-deep: #7c0a3b;
+  --color-blush: #f6e6ec;
+  --color-gold: #e0a24c;
+  /* warm premium neutral, added v3.1 to break the pink-on-pink monotony */
+  --color-cream: #fbefda;
+  /* soft warm gold wash for tinted plate placeholders / accents */
+  --color-butter: #f7e4c4;
+
+  /* display sizes for the landing redesign (v3) */
+  --text-display: 2.625rem;
+  --text-display--line-height: 1.08;
+  --text-display--font-weight: 700;
+  --text-display-lg: 4.25rem;
+  --text-display-lg--line-height: 1.04;
+  --text-display-lg--font-weight: 700;
+
+  /* type scale — base body is 17px, not 16 (older readers, CLAUDE.md §2) */
+  --text-hero: 2rem;
+  --text-hero--line-height: 2.375rem;
+  --text-hero--font-weight: 700;
+  --text-title: 1.5rem;
+  --text-title--line-height: 1.875rem;
+  --text-title--font-weight: 600;
+  --text-heading: 1.25rem;
+  --text-heading--line-height: 1.625rem;
+  --text-heading--font-weight: 600;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.625rem;
+  --text-small: 0.9375rem;
+  --text-small--line-height: 1.375rem;
+  --text-price: 1.25rem;
+  --text-price--line-height: 1.5rem;
+  --text-price--font-weight: 600;
+
+  /* radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-pill: 9999px;
+
+  /* named spacing steps (the numeric p-1/p-2… scale stays derived
+     from the default --spacing: 0.25rem token) */
+  --spacing-gutter: 1rem;
+  --spacing-stack: 1.5rem;
+  --spacing-section: 3rem;
+  --spacing-hero: 4rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-card:
+    0 1px 2px 0 color-mix(in oklab, var(--color-plum-ink) 6%, transparent),
+    0 6px 16px -4px color-mix(in oklab, var(--color-plum-ink) 8%, transparent);
+  --shadow-raised:
+    0 4px 12px -2px color-mix(in oklab, var(--color-plum-ink) 14%, transparent),
+    0 12px 32px -8px color-mix(in oklab, var(--color-plum-ink) 16%, transparent);
+  --shadow-overlay: 0 24px 64px -12px
+    color-mix(in oklab, var(--color-plum-ink) 35%, transparent);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --scrim: color-mix(in oklab, var(--color-plum-ink) 55%, transparent);
+}
+
+@layer base {
+  body {
+    background: var(--color-porcelain);
+    color: var(--color-plum-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+
+  /* every interactive element gets the gold focus ring */
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-blush);
+  }
+
+  dialog::backdrop {
+    background: var(--scrim);
+  }
+
+  body:has(dialog[open]) {
+    overflow: hidden;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* overlay entrances — all suppressed under prefers-reduced-motion below */
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes sheet-left {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+dialog[data-ui="dialog"][open] {
+  animation: dialog-in 160ms ease-out;
+}
+dialog[data-ui="sheet-bottom"][open] {
+  animation: sheet-up 240ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+dialog[data-ui="sheet-right"][open] {
+  animation: sheet-left 240ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+[data-ui="toast"] {
+  animation: toast-in 180ms ease-out;
+}
+
+/* --------------------------------------------------------------------
+   Motion layer. Every class here collapses to a resting state under the
+   prefers-reduced-motion rule below. Each animation is motivated:
+   float = playful idle on hero tiles/decor, spin = the brand sticker,
+   pop = feedback when a date lands, rise = entrance hierarchy,
+   marquee = the one trust strip (content duplicated, so the reduced
+   fallback still reads as a full row).
+   -------------------------------------------------------------------- */
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--tilt, 0deg));
+  }
+  50% {
+    transform: translateY(-7px) rotate(var(--tilt, 0deg));
+  }
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pop-in {
+  0% {
+    transform: scale(0.55);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.07);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes rise-in {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+}
+@keyframes marquee-x {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.float-soft {
+  animation: float-soft 5.5s ease-in-out infinite;
+}
+.spin-slow {
+  animation: spin-slow 26s linear infinite;
+}
+.pop-in {
+  animation: pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.rise-in {
+  animation: rise-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.marquee-track {
+  animation: marquee-x 30s linear infinite;
+}
+.spin-orbit {
+  animation: spin-slow 44s linear infinite;
+}
+.spin-orbit-reverse {
+  animation: spin-slow 44s linear infinite reverse;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
